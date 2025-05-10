@@ -146,23 +146,23 @@
         let byteText = '';
 
         if (monday <= handOverToHer && handOverToHer <= weekEnd) {
-          byteText += `👦 Barn lämnas till henne: ${handOverToHer.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'short' })}<br>`;
+          byteText += `👦 Barn till mamma: ${handOverToHer.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'short' })}<br>`;
         }
         if (monday <= handOverToYou && handOverToYou <= weekEnd) {
-          byteText += `👧 Barn kommer till dig: ${handOverToYou.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'short' })}<br>`;
+          byteText += `👧 Barn till pappa: ${handOverToYou.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'short' })}<br>`;
         }
         if (monday <= handOverToHerAgain && handOverToHerAgain <= weekEnd) {
-          byteText += `👦 Barn lämnas till henne: ${handOverToHerAgain.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'short' })}<br>`;
+          byteText += `👦 Barn till mamma: ${handOverToHerAgain.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'short' })}<br>`;
         }
 
         if (cycleDay >= 0 && cycleDay <= 13) {
-          barnHos = '👨 Barn hos henne (du jobbar)';
+          barnHos = '👨 Barn hos mamma (Niklas jobbar)';
         } else if (cycleDay >= 14 && cycleDay <= 20) {
-          barnHos = '👩 Barn hos dig (första veckan)';
+          barnHos = '👩 Barn hos pappa (första veckan)';
         } else if (cycleDay >= 21 && cycleDay <= 27) {
-          barnHos = '👨 Barn hos henne (mittenvecka)';
+          barnHos = '👨 Barn hos mamma (mittenvecka)';
         } else if (cycleDay >= 28 && cycleDay <= 33) {
-          barnHos = '👩 Barn hos dig (sista veckan)';
+          barnHos = '👩 Barn hos pappa (sista veckan)';
         } else if (cycleDay === 34) {
           barnHos = '🔁 Byte dag – du lämnar barnen';
         }
