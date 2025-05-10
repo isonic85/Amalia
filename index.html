@@ -42,6 +42,8 @@
       display: flex;
       align-items: center;
       gap: 0.8em;
+      padding: 0.3em;
+      border-radius: 4px;
     }
     select, .exInput {
       background: #fff;
@@ -82,26 +84,32 @@
       return localStorage.getItem(id) || '';
     }
 
+    function applyColor(selectEl) {
+      const row = selectEl.closest("li");
+      const value = selectEl.value;
+      row.style.backgroundColor =
+        value === "Dollar Store" ? "#f8d7da" :
+        value === "Passteam" ? "#d1ecf1" :
+        value === "Ledig" ? "#d4edda" : "";
+    }
+
     function clearAll() {
-  if (confirm("Är du säker på att du vill rensa allt?")) {
-    localStorage.clear();
-
-    document.querySelectorAll("select").forEach(sel => sel.value = "");
-    document.querySelectorAll(".exInput").forEach(inp => inp.value = "");
-    document.getElementById("result").innerHTML = "";
-
-    document.getElementById("startDate").value = "";
-    document.getElementById("year").value = new Date().getFullYear();
-
-    alert("Allt har rensats.");
-
-    // 🔄 Generera nytt tomt schema direkt
-    setTimeout(() => {
-      generateSchedule();
-    }, 100);
-  }
-}
-
+      if (confirm("Är du säker på att du vill rensa allt?")) {
+        localStorage.clear();
+        document.querySelectorAll("select").forEach(sel => {
+          sel.value = "";
+          applyColor(sel);
+        });
+        document.querySelectorAll(".exInput").forEach(inp => inp.value = "");
+        document.getElementById("result").innerHTML = "";
+        document.getElementById("startDate").value = "";
+        document.getElementById("year").value = new Date().getFullYear();
+        alert("Allt har rensats.");
+        setTimeout(() => {
+          generateSchedule();
+        }, 100);
+      }
+    }
 
     function generateSchedule() {
       const startDateInput = document.getElementById('startDate').value;
@@ -124,10 +132,8 @@
         const monday = new Date(current);
         while (monday.getDay() !== 1) monday.setDate(monday.getDate() - 1);
         resetTime(monday);
-
         const weekEnd = new Date(monday.getTime() + 6 * oneDay);
         resetTime(weekEnd);
-
         if (weekEnd < förstaByte) {
           current.setDate(current.getDate() + 7);
           weekNum++;
@@ -144,44 +150,36 @@
 
         let barnHos = '';
         let byteText = '';
-
-        if (monday <= handOverToHer && handOverToHer <= weekEnd) {
+        if (monday <= handOverToHer && handOverToHer <= weekEnd)
           byteText += `👦 Barn till mamma: ${handOverToHer.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'short' })}<br>`;
-        }
-        if (monday <= handOverToYou && handOverToYou <= weekEnd) {
+        if (monday <= handOverToYou && handOverToYou <= weekEnd)
           byteText += `👧 Barn till pappa: ${handOverToYou.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'short' })}<br>`;
-        }
-        if (monday <= handOverToHerAgain && handOverToHerAgain <= weekEnd) {
+        if (monday <= handOverToHerAgain && handOverToHerAgain <= weekEnd)
           byteText += `👦 Barn till mamma: ${handOverToHerAgain.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'short' })}<br>`;
-        }
 
-        if (cycleDay >= 0 && cycleDay <= 13) {
+        if (cycleDay >= 0 && cycleDay <= 13)
           barnHos = '👨 Barn hos mamma (Niklas jobbar)';
-        } else if (cycleDay >= 14 && cycleDay <= 20) {
+        else if (cycleDay >= 14 && cycleDay <= 20)
           barnHos = '👩 Barn hos pappa (första veckan)';
-        } else if (cycleDay >= 21 && cycleDay <= 27) {
+        else if (cycleDay >= 21 && cycleDay <= 27)
           barnHos = '👨 Barn hos mamma (mittenvecka)';
-        } else if (cycleDay >= 28 && cycleDay <= 33) {
+        else if (cycleDay >= 28 && cycleDay <= 33)
           barnHos = '👩 Barn hos pappa (sista veckan)';
-        } else if (cycleDay === 34) {
+        else if (cycleDay === 34)
           barnHos = '🔁 Byte dag – du lämnar barnen';
-        }
 
-        // Lista med dag + select + input
         let dagarHTML = '<ul>';
         for (let i = 0; i < 7; i++) {
           const day = new Date(monday.getTime() + i * oneDay);
           const dagText = day.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'short' });
           const fieldId = `week${weekNum}_day${i}`;
           const inputId = `week${weekNum}_day${i}_ex`;
-
           const savedSelect = loadField(fieldId);
           const savedText = loadField(inputId);
-
           dagarHTML += `
             <li>
               <span class="dagLabel">${dagText}</span>
-              <select id="${fieldId}" onchange="saveField('${fieldId}', this.value)">
+              <select id="${fieldId}" onchange="saveField('${fieldId}', this.value); applyColor(this)">
                 <option value="">– Välj –</option>
                 <option value="Dollar Store" ${savedSelect === 'Dollar Store' ? 'selected' : ''}>Dollar Store</option>
                 <option value="Passteam" ${savedSelect === 'Passteam' ? 'selected' : ''}>Passteam</option>
@@ -198,14 +196,15 @@
           <h2>📅 Vecka ${weekNum} (${monday.toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })} - ${weekEnd.toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })})</h2>
           <p>${barnHos}</p>
           <p>${byteText}</p>
-          
           ${dagarHTML}
         `;
         result.appendChild(block);
-
         current.setDate(current.getDate() + 7);
         weekNum++;
       }
+
+      // Apply saved colors
+      document.querySelectorAll("select").forEach(sel => applyColor(sel));
     }
 
     function generatePDF() {
