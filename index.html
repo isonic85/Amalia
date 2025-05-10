@@ -151,20 +151,20 @@
         let barnHos = '';
         let byteText = '';
         if (monday <= handOverToHer && handOverToHer <= weekEnd)
-          byteText += `👦 Barn till mamma: ${handOverToHer.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'short' })}<br>`;
+          byteText += `👦 Till mamma: ${handOverToHer.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'short' })}<br>`;
         if (monday <= handOverToYou && handOverToYou <= weekEnd)
-          byteText += `👧 Barn till pappa: ${handOverToYou.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'short' })}<br>`;
+          byteText += `👧 Till pappa: ${handOverToYou.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'short' })}<br>`;
         if (monday <= handOverToHerAgain && handOverToHerAgain <= weekEnd)
-          byteText += `👦 Barn till mamma: ${handOverToHerAgain.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'short' })}<br>`;
+          byteText += `👦 Till mamma: ${handOverToHerAgain.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'short' })}<br>`;
 
         if (cycleDay >= 0 && cycleDay <= 13)
-          barnHos = '👨 Barn hos mamma (Niklas jobbar)';
+          barnHos = '👨 Hos mamma (Niklas jobbar)';
         else if (cycleDay >= 14 && cycleDay <= 20)
-          barnHos = '👩 Barn hos pappa (första veckan)';
+          barnHos = '👩 Hos pappa (första veckan)';
         else if (cycleDay >= 21 && cycleDay <= 27)
-          barnHos = '👨 Barn hos mamma (mittenvecka)';
+          barnHos = '👨 Hos mamma (mittenvecka)';
         else if (cycleDay >= 28 && cycleDay <= 33)
-          barnHos = '👩 Barn hos pappa (sista veckan)';
+          barnHos = '👩 Hos pappa (sista veckan)';
         else if (cycleDay === 34)
           barnHos = '🔁 Byte dag – du lämnar barnen';
 
