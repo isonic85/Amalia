@@ -13,34 +13,31 @@
     }
     .veckoblock {
       background: #2c2c2c;
-      padding: 1em;
+      padding: 0.8em;
       border-radius: 8px;
       margin-bottom: 1em;
       page-break-inside: avoid;
     }
-    h2 {
-      margin-top: 0;
-    }
-    input, button, select, .exInput {
+    input, button, select, .exInput, .customColor, .customLabel {
       padding: 0.4em;
       font-size: 0.7em;
-      margin: 0.5em 0;
+      margin: 0.4em 0.3em 0.4em 0;
       border-radius: 4px;
       border: none;
     }
     button {
       cursor: pointer;
-      margin-right: 0.5em;
     }
     ul {
       padding-left: 0;
       margin: 0.5em 0 0;
+      page-break-inside: avoid;
     }
     li {
       list-style: none;
-      margin-bottom: 0.4em;
+      margin-bottom: 0.2em;
       display: flex;
-      align-items: center;
+      align-items: stretch;
       gap: 0.5em;
       padding: 0.2em;
       border-radius: 4px;
@@ -56,11 +53,45 @@
       min-width: 160px;
       text-transform: capitalize;
     }
+    .custom-control {
+      margin-bottom: 1em;
+      background: #333;
+      padding: 0.6em;
+      border-radius: 6px;
+    }
+    .custom-control h3 {
+      margin: 0.2em 0 0.6em 0;
+    }
+    .optionRow {
+      display: flex;
+      align-items: center;
+      gap: 0.4em;
+      margin-top: 0.3em;
+    }
+    .optionRow input[type=color] {
+      width: 2em;
+      height: 2em;
+      padding: 0;
+      border-radius: 4px;
+      border: none;
+    }
+    .optionRow span {
+      flex: 1;
+    }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
   <h1>Amalias schema</h1>
+
+  <div class="custom-control">
+    <h3>🛠️ Hantera rullistval</h3>
+    <input type="text" placeholder="Namn (t.ex. ICA)" id="customLabel" class="customLabel">
+    <input type="color" id="customColor" class="customColor">
+    <button onclick="addCustomOption()">➕ Lägg till</button>
+    <div id="optionList"></div>
+  </div>
+
   <label>Startdatum för Niklas arbetsdag (14/21 rotation):</label><br>
   <input type="date" id="startDate"><br>
   <label>Välj år:</label>
@@ -68,9 +99,69 @@
   <button onclick="generateSchedule()">Generera schema</button>
   <button onclick="generatePDF()">Ladda ner schema som PDF</button>
   <button onclick="clearAll()">🗑️ Rensa schema</button>
+
   <div id="result"></div>
 
   <script>
+    const defaultOptions = [
+      { label: "Dollar Store", color: "#d56b8c" },
+      { label: "Passteam", color: "#6ca0dc" },
+      { label: "Kliver av 09.00", color: "#75FA8D" },
+      { label: "Ledig", color: "#6bbf59" }
+    ];
+
+    function getOptions() {
+      const saved = JSON.parse(localStorage.getItem("customOptions") || "null");
+      return saved && Array.isArray(saved) ? saved : [...defaultOptions];
+    }
+
+    function saveOptions(options) {
+      localStorage.setItem("customOptions", JSON.stringify(options));
+      renderOptionList();
+    }
+
+    function addCustomOption() {
+      const label = document.getElementById("customLabel").value.trim();
+      const color = document.getElementById("customColor").value;
+      if (!label) return alert("Skriv ett namn för valet.");
+      const options = getOptions();
+      if (options.some(opt => opt.label === label)) {
+        alert("Valet finns redan.");
+        return;
+      }
+      options.push({ label, color });
+      saveOptions(options);
+      alert("Tillagt! Generera om schemat.");
+      document.getElementById("customLabel").value = "";
+    }
+
+    function deleteOption(label) {
+      const options = getOptions().filter(opt => opt.label !== label);
+      saveOptions(options);
+      alert("Val borttaget. Generera om schemat.");
+    }
+
+    function updateOptionColor(label, newColor) {
+      const options = getOptions().map(opt => opt.label === label ? { ...opt, color: newColor } : opt);
+      saveOptions(options);
+    }
+
+    function renderOptionList() {
+      const list = document.getElementById("optionList");
+      const options = getOptions();
+      list.innerHTML = "";
+      options.forEach(opt => {
+        const row = document.createElement("div");
+        row.className = "optionRow";
+        row.innerHTML = `
+          <span>${opt.label}</span>
+          <input type="color" value="${opt.color}" onchange="updateOptionColor('${opt.label}', this.value)">
+          <button onclick="deleteOption('${opt.label}')">❌</button>
+        `;
+        list.appendChild(row);
+      });
+    }
+
     function resetTime(d) {
       d.setHours(0, 0, 0, 0);
       return d;
@@ -87,11 +178,8 @@
     function applyColor(selectEl) {
       const row = selectEl.closest("li");
       const value = selectEl.value;
-      row.style.backgroundColor =
-  value === "Dollar Store" ? "#d56b8c" :
-  value === "Passteam"     ? "#6ca0dc" :
-  value === "Kliver av 09.00"     ? "#6ca0dc" :
-  value === "Ledig"        ? "#6bbf59" : "";
+      const found = getOptions().find(opt => opt.label === value);
+      row.style.backgroundColor = found ? found.color : "";
     }
 
     function clearAll() {
@@ -119,6 +207,7 @@
         return;
       }
 
+      const options = getOptions();
       const startDate = resetTime(new Date(startDateInput));
       const year = parseInt(document.getElementById('year').value);
       const result = document.getElementById('result');
@@ -177,15 +266,17 @@
           const inputId = `week${weekNum}_day${i}_ex`;
           const savedSelect = loadField(fieldId);
           const savedText = loadField(inputId);
+
+          let optionsHTML = '<option value="">– Välj –</option>';
+          for (const opt of options) {
+            optionsHTML += `<option value="${opt.label}" ${savedSelect === opt.label ? 'selected' : ''}>${opt.label}</option>`;
+          }
+
           dagarHTML += `
             <li>
               <span class="dagLabel">${dagText}</span>
               <select id="${fieldId}" onchange="saveField('${fieldId}', this.value); applyColor(this)">
-                <option value="">– Välj –</option>
-                <option value="Dollar Store" ${savedSelect === 'Dollar Store' ? 'selected' : ''}>Dollar Store</option>
-                <option value="Passteam" ${savedSelect === 'Passteam' ? 'selected' : ''}>Passteam</option>
-                <option value="Kliver av 09.00" ${savedSelect === 'Kliver av 09.00' ? 'selected' : ''}>Kliver av 09.00</option>
-                <option value="Ledig" ${savedSelect === 'Ledig' ? 'selected' : ''}>Ledig</option>
+                ${optionsHTML}
               </select>
               <input type="text" class="exInput" id="${inputId}" value="${savedText}" placeholder="Ex..." oninput="saveField('${inputId}', this.value)">
             </li>`;
@@ -205,21 +296,22 @@
         weekNum++;
       }
 
-      // Apply saved colors
       document.querySelectorAll("select").forEach(sel => applyColor(sel));
     }
 
     function generatePDF() {
       const element = document.getElementById('result');
       const opt = {
-  margin: 0.15,                    // Mindre marginal
-  filename: 'barnschema.pdf',
-  image: { type: 'jpeg', quality: 0.95 },
-  html2canvas: { scale: 1.6 },     // Lite lägre upplösning
-  jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-};
+        margin: 0.15,
+        filename: 'barnschema.pdf',
+        image: { type: 'jpeg', quality: 0.95 },
+        html2canvas: { scale: 1.6 },
+        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+      };
       html2pdf().set(opt).from(element).save();
     }
+
+    window.onload = renderOptionList;
   </script>
 </body>
 </html>
