@@ -90,6 +90,7 @@
       row.style.backgroundColor =
   value === "Dollar Store" ? "#d56b8c" :
   value === "Passteam"     ? "#6ca0dc" :
+  value === "Kliver av 09.00"     ? "#6ca0dc" :
   value === "Ledig"        ? "#6bbf59" : "";
     }
 
@@ -183,6 +184,7 @@
                 <option value="">– Välj –</option>
                 <option value="Dollar Store" ${savedSelect === 'Dollar Store' ? 'selected' : ''}>Dollar Store</option>
                 <option value="Passteam" ${savedSelect === 'Passteam' ? 'selected' : ''}>Passteam</option>
+                <option value="Kliver av 09.00" ${savedSelect === 'Kliver av 09.00' ? 'selected' : ''}>Kliver av 09.00</option>
                 <option value="Ledig" ${savedSelect === 'Ledig' ? 'selected' : ''}>Ledig</option>
               </select>
               <input type="text" class="exInput" id="${inputId}" value="${savedText}" placeholder="Ex..." oninput="saveField('${inputId}', this.value)">
